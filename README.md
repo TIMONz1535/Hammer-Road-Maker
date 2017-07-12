@@ -1,5 +1,5 @@
 # Hammer Road Maker
-A simple tool that allows you to create curved brushed road in the game, and then export their to vmf.
+A simple tool that allows you to create curved brushed road in the game, and then export them to vmf.
 It is useful when building roads on displacement surfaces (mountains, hills).
 I was in a hurry when I made this version.
 Therefore, it may contain a significant amount of bad coding.
@@ -10,7 +10,7 @@ Press R - Change mode
 Press Mouse1 - Create or move point to cursor
 Press Mouse2 - Remove last or select nearest point
 ```
-To display the points, enter the developer 1 in console. This can cause a lower in FPS with a large amount of points.
+To display the points, enter the developer 1 in console. This can cause a lower FPS with large amount of points.
 
 ## Console commands:
 ```
@@ -29,4 +29,6 @@ roadmaker_updatemesh - Internal function to update the road.
 ```
 To export your road mesh to vmf, enter the ***roadmaker_getvmf*** in console. Your vmf structure file will be in the data folder and is named ***vmfgenerator.vmf.txt***.
 
-If you create extremely twisted roads, such that they look broken. Their vertices can enter into each other and get inverted meshes. You will see in the hammer editor the error message "invalid solids".
+If you create extremely twisted roads, they will appear broken. Their vertices can merge into each other and cause inverted meshes. Hammer Editor will display "invalid solids" error message.
+
+Available in Workshop: http://steamcommunity.com/sharedfiles/filedetails/?id=974013129
