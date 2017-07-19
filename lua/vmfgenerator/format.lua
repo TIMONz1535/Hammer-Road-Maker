@@ -4,7 +4,7 @@
 --]]
 
 concommand.Add('roadmaker_getvmf', function()
-	local width = GetConVar('roadmaker_width'):GetInt()
+	local width = RoadMaker.Cfgs['width']:GetString()
 	local offset = 0
 	local vmf = 'world\n{'
 	
@@ -12,7 +12,7 @@ concommand.Add('roadmaker_getvmf', function()
 		vmf = vmf..'\n\tsolid\n\t{'
 		
 		for fk, verts in ipairs(faces) do
-			local mat = verts.mat
+			local mat = RoadMaker.Cvars[verts.mat]:GetString()
 			vmf = vmf..'\n\t\tside\n\t\t{\n\t\t\t"plane" "'
 			
 			local start = true
@@ -53,5 +53,5 @@ concommand.Add('roadmaker_getvmf', function()
 	end
 
 	vmf = vmf..'\n}'
-	file.Write('VMFGenerator.vmf.txt', vmf)
+	file.Write('vmfgenerator.vmf.txt', vmf)
 end)

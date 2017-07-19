@@ -3,7 +3,7 @@
 	http://steamcommunity.com/id/TIMON_Z1535/
 --]]
 
-function VMFGenerator:GetLerpRoad(startpos, midpos, endpos)
+function RoadMaker:GetLerpRoad(startpos, midpos, endpos)
 	local toend1 = midpos - startpos
 	local ang1 = toend1:Angle()
 	local right1 = ang1:Right()
@@ -17,13 +17,10 @@ end
 
 local prevangle = 0
 
-function VMFGenerator:CreateLineRoad(startpos, endpos, width, rightstart, rightend)
+function RoadMaker:CreateLineRoad(startpos, endpos, width, height, rightstart, rightend)
 	local toend = endpos - startpos
 	local ang = toend:Angle()
 	local right = ang:Right()
-	
-	table.insert(self.textures, {ang.y, toend:Length(), ang})
-	table.insert(self.textures, {ang.y, toend:Length(), ang})
 	
 	local rightstart = rightstart or right
 	local rightend = rightend or right
@@ -51,9 +48,9 @@ function VMFGenerator:CreateLineRoad(startpos, endpos, width, rightstart, righte
 	vert4.z = math.Round(vert4.z)
 	
 	if prevangle > ang.y then
-		self:CreateConvexBox(vert1, vert2, vert3, vert4)
+		self:CreateConvexHBox(vert1, vert2, vert3, vert4, height, false, 'top', 'nodraw', 'side', 'nodraw', 'side', 'bottom', 'nodraw')
 	else
-		self:CreateConvexBox(vert1, vert2, vert3, vert4, true)
+		self:CreateConvexHBox(vert1, vert2, vert3, vert4, height, true, 'top', 'nodraw', 'side', 'nodraw', 'side', 'bottom', 'nodraw')
 	end
 	
 	prevangle = ang.y

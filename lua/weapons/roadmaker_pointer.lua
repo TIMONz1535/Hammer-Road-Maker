@@ -21,85 +21,102 @@ SWEP.Secondary.Ammo = ''
 SWEP.ViewModel = 'models/weapons/v_pistol.mdl'
 SWEP.WorldModel = 'models/weapons/w_pistol.mdl'
 
+if CLIENT then return end
+
 function SWEP:Initialize()
-	if CLIENT then
-		self.IsCreator = true
-		self.Select = 0
-	end
+	self.IsCreator = true
+	self.Select = 0
+end
+
+function SWEP:Dirtymake(key, access)
+	RoadMaker:UpdatePoint(key)
+	RoadMaker.UpdateMeshs(key, access)
 end
 
 function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + 0.1)
-	self:CallOnClient('PrimaryAttack')
 	
-	if CLIENT then
-		if self.IsCreator then
-			local vec = self.Owner:GetEyeTrace().HitPos
-			vec.x = math.Round(vec.x/8)*8
-			vec.y = math.Round(vec.y/8)*8
-			vec.z = math.Round(vec.z/8)*8
-			
-			table.insert(RoadMaker.points, vec + Vector(0,0,32))
-		elseif self.Select != 0 and RoadMaker.points[self.Select] then
-			local vec = self.Owner:GetEyeTrace().HitPos
-			vec.x = math.Round(vec.x/8)*8
-			vec.y = math.Round(vec.y/8)*8
-			vec.z = math.Round(vec.z/8)*8
-			
-			RoadMaker.points[self.Select] = vec + Vector(0,0,32)
-		end
+	local vec = util.TraceLine({
+		start = self.Owner:GetShootPos(),
+		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector()*10000,
+		filter = function(ent) if (ent:GetClass() == "roadmaker_phys") then return false end end
+	}).HitPos
+	
+	if self.IsCreator then
+		vec.x = math.Round(vec.x/8)*8
+		vec.y = math.Round(vec.y/8)*8
+		vec.z = math.Round(vec.z/8)*8
 		
-		RunConsoleCommand('roadmaker_updatemesh')
+		table.insert(RoadMaker.Points, vec + Vector(0,0,32))
+		self:Dirtymake(#RoadMaker.Points)
+	elseif self.Select != 0 and RoadMaker.Points[self.Select] then
+		vec.x = math.Round(vec.x/8)*8
+		vec.y = math.Round(vec.y/8)*8
+		vec.z = math.Round(vec.z/8)*8
+		
+		RoadMaker.Points[self.Select] = vec + Vector(0,0,32)
+		self:Dirtymake(self.Select, true)
 	end
 end
 
 function SWEP:SecondaryAttack()
 	self:SetNextSecondaryFire(CurTime() + 0.1)
-	self:CallOnClient('SecondaryAttack')
 	
-	if CLIENT then
-		self.Select = 0
+	self.Select = 0
+	
+	if self.IsCreator then
+		local key = #RoadMaker.Points
+		RoadMaker.Points[key] = nil
+		self.Owner:EmitSound('buttons/button18.wav')
+		self:Dirtymake(key)
+	else
+		local mindist = 500000
+		local key = 0
+		local vec = util.TraceLine({
+			start = self.Owner:GetShootPos(),
+			endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector()*10000,
+			filter = function(ent) if (ent:GetClass() == "roadmaker_phys") then return false end end
+		}).HitPos
 		
-		if self.IsCreator then
-			RoadMaker.points[#RoadMaker.points] = nil
-			RunConsoleCommand('roadmaker_updatemesh')
-			self:EmitSound('buttons/button18.wav')
-		else
-			local mindist = 500000
-			local key = 0
-			local trpos = self.Owner:GetEyeTrace().HitPos
+		for k, pos in ipairs(RoadMaker.Points) do
+			local dist = vec:DistToSqr(pos)
 			
-			for k, pos in ipairs(RoadMaker.points) do
-				local dist = trpos:DistToSqr(pos)
-				
-				if (dist < mindist) then
-					mindist = dist
-					key = k
-				end
+			if (dist < mindist) then
+				mindist = dist
+				key = k
 			end
-			
-			if key != 0 then
-				self.Select = key
-				debugoverlay.Sphere(RoadMaker.points[key], 50, 1, Color(0, 255, 0), true)
-				self:EmitSound('buttons/button14.wav')
-			end
+		end
+		
+		if key != 0 then
+			self.Select = key
+			debugoverlay.Sphere(RoadMaker.Points[key], 50, 1, Color(0, 255, 0), true)
+			self.Owner:EmitSound('buttons/button14.wav')
 		end
 	end
 end
 
+-- For debug
+-- function SWEP:Think()
+	-- for k, pos in ipairs(RoadMaker.Points) do
+		-- debugoverlay.Cross(pos + Vector(0,0,20), 10, 0.03, Color(0, 255, 255), true)
+	-- end
+	
+	-- for k, v in ipairs(VMFGenerator.multiconvexphys) do
+		-- for k2, pos in ipairs(v) do
+			-- debugoverlay.Cross(pos, 10, 0.03, Color(0, 255, 0), true)
+		-- end
+	-- end
+-- end
+
 function SWEP:Reload()
 	if self.NextReload and self.NextReload > CurTime() then return end
 	self.NextReload = CurTime() + 0.5
+
+	self.IsCreator = !self.IsCreator
 	
-	self:CallOnClient('Reload')
-	
-	if CLIENT then
-		self.IsCreator = !self.IsCreator
-		
-		if self.IsCreator then
-			self.Owner:ChatPrint('Mode: Creator')
-		else
-			self.Owner:ChatPrint('Mode: Positioner')
-		end
+	if self.IsCreator then
+		self.Owner:ChatPrint('Mode: Creator')
+	else
+		self.Owner:ChatPrint('Mode: Positioner')
 	end
 end
