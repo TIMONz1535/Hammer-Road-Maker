@@ -130,8 +130,8 @@ function RoadMaker:InitPoints(ply)
 	net.Send(ply)
 end
 
-hook.Add('PlayerSpawn', 'RoadMakerInit', function(ply)
--- hook.Add('PlayerInitialSpawn', 'RoadMakerInit', function(ply)
+-- hook.Add('PlayerSpawn', 'RoadMakerInit', function(ply)
+hook.Add('PlayerInitialSpawn', 'RoadMakerInit', function(ply)
 	net.Start('hrm_init')
 		net.WriteUInt(table.Count(RoadMaker.Cvars), 5)
 		for key in pairs(RoadMaker.Cvars) do
